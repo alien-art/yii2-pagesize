@@ -13,18 +13,19 @@ class PageSize extends yii\base\Widget
 	public $mPageSize = 10;
 	public $mGridId = '';
 	public $mDefPageSize = 10;
+        public $pjaxEnable = false;
     public $Show = true;
 	
 	public function run()
 	{			
-		Yii::$app->session->set('pageSize', $this->mPageSize);
-		
-		$this->mPageSize = null == $this->mPageSize ? $this->mDefPageSize : $this->mPageSize;
+		//Yii::$app->session->set('pageSize', $this->mPageSize);
+		$this->mPageSize = ($this->mPageSize == null) ? $this->mDefPageSize : $this->mPageSize;
 		
 		$content = Yii::t('pagesize', 'On the page: ');
 		$content .= Html::dropDownList('pageSize', $this->mPageSize, $this->mPageSizeOptions,[
-				'onchange'=>"$.pjax.reload({container:'#".$this->mGridId."', data:{pageSize: $(this).val() }})",
-		]);
+				'onchange'=>($this->pjaxEnable)?"$.pjax.reload({container:'#".$this->mGridId."', data:{pageSize: $(this).val() }})":"location += (location.search ? \"&\" : \"?\") + \"pageSize=\"+$(this).val();",
+                                'class' => 'form-control',
+                    ]);
                 
                 if ($this->Show)
                     echo $content;
