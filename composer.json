@@ -1,0 +1,24 @@
+{
+"name": "alien/yii2-pagesize",
+"description": "PageSize for GridView Yii2",
+"keywords": ["yii", "PageSize"],
+"type": "yii2-extension",
+"license": "BSD-3-Clause",
+"version": "0.1",
+"authors": [
+{
+"name": "Alien-art",
+"email": "alien@alien-art.ru"
+}
+],
+"minimum-stability": "stable",
+"require": {
+"yiisoft/yii2": "~2.0",
+"yiisoft/yii2-bootstrap": "*"
+},
+"autoload": {
+"psr-4": {
+"alien\\PageSize\\": ""
+}
+}
+}
