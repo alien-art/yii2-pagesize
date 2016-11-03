@@ -1,55 +1,142 @@
 <?php
+
 /**
- * Виджет для вывода хлебных крошек
+ * Виджет для переключателя страниц и выобора количества записей на странице
  */
+
 namespace alien\PageSize;
 
 use Yii;
 use yii\helpers\Html;
 
-class PageSize extends yii\base\Widget
-{
-	public $mPageSizeOptions = [10=>10, 25=>25, 50=>50, 75=>75, 100=>100];
-	public $mPageSize = 10;
-	public $mGridId = '';
-	public $mDefPageSize = 10;
-        public $pjaxEnable = false;
-    public $Show = true;
-	
-	public function run()
-	{			
-		//Yii::$app->session->set('pageSize', $this->mPageSize);
-		$this->mPageSize = ($this->mPageSize == null) ? $this->mDefPageSize : $this->mPageSize;
-		
-		$content = Yii::t('pagesize', 'On the page: ');
-		$content .= Html::dropDownList('pageSize', $this->mPageSize, $this->mPageSizeOptions,[
-				'onchange'=>($this->pjaxEnable)?"$.pjax.reload({container:'#".$this->mGridId."', data:{pageSize: $(this).val() }})":"location += (location.search ? \"&\" : \"?\") + \"pageSize=\"+$(this).val();",
-                                'class' => 'form-control',
-                    ]);
-                
-                if ($this->Show)
-                    echo $content;
-                else
-                    return $content;
-	}
-        
-        /**
-	 * Инициализация
-	 */
-	public function init()
-	{
-            parent::init();
-            $this->registerTranslations();
-	}
-     
-        public function registerTranslations()
-        {
-            Yii::$app->i18n->translations['pagesize'] = 
-            [
-                'class' => 'yii\i18n\PhpMessageSource',
-                'basePath' => '@alien/PageSize/messages',
-                'forceTranslation' => true
-            ];
+class PageSize extends \yii\widgets\LinkPager {
+
+    /**
+     * {pageButtons} {customPage} {pageSize}
+     * @var type string
+     */
+    public $template = '{pageButtons} {pageSize}';
+
+    /**
+     *
+     * @var type array
+     */
+    public $pageSizeList = [-1=>'Все',10=>10,20=>20,50=>50,100=>100,200=>200];
+
+    /**
+     *
+     * Margin style for the  pageSize control
+     */
+    public $pageSizeMargin = "margin-left:5px;margin-right:5px;";
+
+    /**
+     * customPage width
+     */
+    public $customPageWidth = 50;
+
+    /**
+     * Margin style for the  customPage control
+     */
+    public $customPageMargin = "margin-left:5px;margin-right:5px;";
+
+    /**
+     * Jump
+     */
+    public $customPageBefore = '';
+
+    /**
+     * Page
+     */
+    public $customPageAfter = "";
+
+    /**
+     * pageSize style
+     */
+    public $pageSizeOptions = ['class' => 'form-control', 'style' => 'display: inline-block;width:auto;margin-top:0px;'];
+
+    /**
+     * customPage style
+     */
+    public $customPageOptions = ['class' => 'form-control', 'style' => 'display: inline-block;margin-top:0px;'];
+
+    /**
+     * Инициализация
+     */
+    public function init() {
+        parent::init();
+        $this->registerTranslations();
+        if ($this->pageSizeMargin) {
+            Html::addCssStyle($this->pageSizeOptions, $this->pageSizeMargin);
         }
+        if ($this->customPageWidth) {
+            Html::addCssStyle($this->customPageOptions, 'width:' . $this->customPageWidth . 'px;');
+        }
+        if ($this->customPageMargin) {
+            Html::addCssStyle($this->customPageOptions, $this->customPageMargin);
+        }
+    }
+
+    public function registerTranslations() {
+        Yii::$app->i18n->translations['pagesize'] = [
+            'class' => 'yii\i18n\PhpMessageSource',
+            'basePath' => '@alien/PageSize/messages',
+            'forceTranslation' => true
+        ];
+    }
+
+    public function run() {
+
+        if ($this->registerLinkTags) {
+            $this->registerLinkTags();
+        }
+        echo $this->renderPageContent();
+        //Yii::$app->session->set('pageSize', $this->mPageSize);
+       /* $this->mPageSize = ($this->mPageSize == null) ? $this->mDefPageSize : $this->mPageSize;
+
+        $content = Yii::t('pagesize', 'On the page: ');
+        $content .= Html::dropDownList('pageSize', $this->mPageSize, $this->mPageSizeOptions, [
+                    'onchange' => ($this->pjaxEnable) ? "$.pjax.reload({container:'#" . $this->mGridId . "', data:{pageSize: $(this).val() }})" : "location += (location.search ? \"&\" : \"?\") + \"pageSize=\"+$(this).val();",
+                    'class' => 'form-control',
+        ]);
+
+        if ($this->Show)
+            echo $content;
+        else
+            return $content;*/
+    }
+
+    protected function renderPageContent() {
+        return preg_replace_callback('/\\{([\w\-\/]+)\\}/', function ($matches) {
+            $name = $matches[1];
+            if ('customPage' == $name) {
+                return $this->renderCustomPage();
+            } else if ('pageSize' == $name) {
+                return $this->renderPageSize();
+            } else if ('pageButtons' == $name) {
+                return $this->renderPageButtons();
+            }
+            return "";
+        }, $this->template);
+    }
+
+    protected function renderPageSize() {
+        return Yii::t('pagesize', 'On the page: ').Html::dropDownList($this->pagination->pageSizeParam, $this->pagination->getPageSize(), $this->pageSizeList, $this->pageSizeOptions);
+    }
+
+    protected function renderCustomPage() {
+        $page = 1;
+        $params = Yii::$app->getRequest()->queryParams;
+        if (isset($params[$this->pagination->pageParam])) {
+            $page = intval($params[$this->pagination->pageParam]);
+            if ($page < 1) {
+                $page = 1;
+            } else if ($page > $this->pagination->getPageCount()) {
+                $page = $this->pagination->getPageCount();
+            }
+        }
+        return $this->customPageBefore . Html::textInput($this->pagination->pageParam, $page, $this->customPageOptions) . $this->customPageAfter;
+    }
+
 }
+
 ?>
