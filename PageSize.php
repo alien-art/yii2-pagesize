@@ -15,7 +15,7 @@ class PageSize extends \yii\widgets\LinkPager {
      * {pageButtons} {customPage} {pageSize}
      * @var type string
      */
-    public $template = '<div style="white-space: nowrap;"><div style="display: inline-block;">{pageSize}</div><div style="display: inline-block;">{pageButtons}</div></div>',
+    public $template = '<div style="white-space: nowrap;"><div style="display: inline-block;">{pageSize}</div><div style="display: inline-block;">{pageButtons}</div></div>';
 
     /**
      *
