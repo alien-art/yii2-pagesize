@@ -15,13 +15,13 @@ class PageSize extends \yii\widgets\LinkPager {
      * {pageButtons} {customPage} {pageSize}
      * @var type string
      */
-    public $template = '{pageButtons} {pageSize}';
+    public $template = '<div style="white-space: nowrap;"><div style="display: inline-block;">{pageSize}</div><div style="display: inline-block;">{pageButtons}</div></div>',
 
     /**
      *
      * @var type array
      */
-    public $pageSizeList = [-1=>'Все',10=>10,20=>20,50=>50,100=>100,200=>200];
+    public $pageSizeList = [''=>'Все',10=>10,20=>20,50=>50,100=>100,200=>200];
 
     /**
      *
